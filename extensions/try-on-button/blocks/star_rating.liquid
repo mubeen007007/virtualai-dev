@@ -1,0 +1,313 @@
+<div class="feyre-tryon-wrap">
+  <button
+    type="button"
+    class="feyre-tryon-btn"
+    onclick="document.getElementById('feyre-tryon-modal').style.display='flex'">
+    Try On
+  </button>
+</div>
+
+<div id="feyre-tryon-modal" class="feyre-tryon-modal" style="display:none;">
+  <div class="feyre-tryon-box">
+    <button
+      type="button"
+      class="feyre-tryon-close"
+      onclick="document.getElementById('feyre-tryon-modal').style.display='none'">
+      ×
+    </button>
+
+    <h3>Virtual Try On</h3>
+    <p class="feyre-subtext">Upload your photo to preview this outfit.</p>
+
+    <div class="feyre-tryon-grid">
+      {% if product.featured_image %}
+        <div class="feyre-col">
+          <p class="feyre-preview-label">Outfit preview</p>
+          <img
+            class="feyre-preview-img"
+            src="{{ product.featured_image | image_url: width: 500 }}"
+            alt="{{ product.title | escape }}"
+            width="240"
+            height="320">
+        </div>
+      {% endif %}
+
+      <div class="feyre-col">
+        <p class="feyre-preview-label">Your photo</p>
+
+        <input
+          type="file"
+          id="feyre-tryon-upload"
+          accept="image/*"
+          onchange="feyrePreviewImage(event)">
+
+        <div id="feyre-tryon-preview-wrap" style="display:none;">
+          <img
+            id="feyre-tryon-preview"
+            class="feyre-preview-img"
+            src=""
+            alt="Preview"
+            width="240"
+            height="320">
+        </div>
+
+        <div id="feyre-loading-text" class="feyre-loading-text" style="display:none;"></div>
+
+        <div id="feyre-result-box" class="feyre-result-box" style="display:none;">
+          <p class="feyre-preview-label">Backend response</p>
+          <pre id="feyre-result-text"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="feyre-tryon-actions">
+      <button
+        type="button"
+        class="feyre-secondary-btn"
+        onclick="document.getElementById('feyre-tryon-modal').style.display='none'">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="feyre-primary-btn"
+        onclick="feyreGenerateTryOn()">
+        Generate Try On
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .feyre-tryon-btn {
+    padding: 12px 22px;
+    background: #111;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 6px;
+  }
+
+  .feyre-tryon-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 20px;
+  }
+
+  .feyre-tryon-box {
+    background: #fff;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 14px;
+    padding: 24px;
+    position: relative;
+  }
+
+  .feyre-tryon-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: transparent;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .feyre-tryon-box h3 {
+    margin: 0 0 8px;
+  }
+
+  .feyre-subtext {
+    margin: 0 0 18px;
+    color: #666;
+  }
+
+  .feyre-tryon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .feyre-col {
+    min-width: 0;
+  }
+
+  .feyre-preview-label {
+    margin: 0 0 10px;
+    font-weight: 600;
+    color: #111;
+  }
+
+  .feyre-preview-img {
+    width: 100%;
+    max-width: 100%;
+    height: 320px;
+    object-fit: contain;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fafafa;
+    display: block;
+  }
+
+  .feyre-col input[type="file"] {
+    display: block;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .feyre-loading-text {
+    margin-top: 14px;
+    font-weight: 600;
+    color: #111;
+  }
+
+  .feyre-result-box {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+
+  .feyre-result-box pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .feyre-tryon-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 22px;
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding-top: 12px;
+  }
+
+  .feyre-secondary-btn,
+  .feyre-primary-btn {
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .feyre-secondary-btn {
+    background: #fff;
+    border: 1px solid #ccc;
+  }
+
+  .feyre-primary-btn {
+    background: #111;
+    color: #fff;
+    border: none;
+  }
+
+  @media (max-width: 768px) {
+    .feyre-tryon-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .feyre-preview-img {
+      height: 240px;
+    }
+
+    .feyre-tryon-actions {
+      flex-direction: column;
+    }
+
+    .feyre-secondary-btn,
+    .feyre-primary-btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  function feyrePreviewImage(event) {
+    var file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var previewImage = document.getElementById('feyre-tryon-preview');
+      var previewWrap = document.getElementById('feyre-tryon-preview-wrap');
+
+      if (previewImage && previewWrap) {
+        previewImage.src = e.target.result;
+        previewWrap.style.display = 'block';
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function feyreGenerateTryOn() {
+    var uploadInput = document.getElementById('feyre-tryon-upload');
+    var loadingText = document.getElementById('feyre-loading-text');
+    var resultBox = document.getElementById('feyre-result-box');
+    var resultText = document.getElementById('feyre-result-text');
+
+    if (!uploadInput || !uploadInput.files || !uploadInput.files[0]) {
+      alert('Please choose your photo first.');
+      return;
+    }
+
+    var userFile = uploadInput.files[0];
+    var productImage = {{ product.featured_image | image_url: width: 800 | json }};
+
+    var formData = new FormData();
+    formData.append('userImage', userFile);
+    formData.append('productImage', productImage);
+
+    loadingText.style.display = 'block';
+    loadingText.innerText = 'Sending request to backend...';
+    resultBox.style.display = 'none';
+    resultText.textContent = '';
+
+    try {
+      var response = await fetch('http://localhost:56436/api/tryon', {
+        method: 'POST',
+        body: formData
+      });
+
+      var text = await response.text();
+      console.log('RAW RESPONSE:', text);
+
+      var data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error(text);
+      }
+
+      loadingText.innerText = 'Backend connected successfully.';
+      resultBox.style.display = 'block';
+      resultText.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+      loadingText.innerText = 'Request failed.';
+      resultBox.style.display = 'block';
+      resultText.textContent = error.message || 'Unknown error';
+    }
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Try On Button",
+  "target": "section",
+  "settings": []
+}
+{% endschema %}
