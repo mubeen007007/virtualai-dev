@@ -7,9 +7,18 @@
   </button>
 </div>
 
-<div id="feyre-tryon-overlay" class="feyre-tryon-overlay" style="display:none;" onclick="feyreOverlayClose(event)">
+<div
+  id="feyre-tryon-overlay"
+  class="feyre-tryon-overlay"
+  style="display:none;"
+  onclick="feyreOverlayClose(event)">
   <div id="feyre-tryon-drawer" class="feyre-tryon-drawer">
-    <button type="button" class="feyre-close-btn" onclick="feyreCloseTryOnDrawer()">×</button>
+    <button
+      type="button"
+      class="feyre-close-btn"
+      onclick="feyreCloseTryOnDrawer()">
+      ×
+    </button>
 
     <div class="feyre-drawer-head">
       <h2>Try It On</h2>
@@ -38,7 +47,7 @@
             class="feyre-preview-image"
             src="{{ product.featured_image | image_url: width: 700 }}"
             alt="{{ product.title | escape }}"
-            width="210"
+            width="220"
             height="300">
         {% endif %}
       </div>
@@ -47,14 +56,21 @@
         type="file"
         id="feyre-tryon-upload"
         accept="image/*"
+        capture="environment"
         style="display:none;"
         onchange="feyreHandlePhotoSelect(event)">
 
-      <button type="button" class="feyre-main-btn" onclick="document.getElementById('feyre-tryon-upload').click()">
+      <button
+        type="button"
+        class="feyre-main-btn"
+        onclick="document.getElementById('feyre-tryon-upload').click()">
         + Choose Your Photo
       </button>
 
-      <button type="button" class="feyre-alt-btn">
+      <button
+        type="button"
+        class="feyre-alt-btn"
+        onclick="document.getElementById('feyre-tryon-upload').click()">
         📷 Open Camera
       </button>
 
@@ -75,15 +91,22 @@
           class="feyre-review-image"
           src=""
           alt="Review photo"
-          width="230"
-          height="340">
+          width="235"
+          height="350">
 
-        <button type="button" class="feyre-change-btn" onclick="document.getElementById('feyre-tryon-upload').click()">
+        <button
+          type="button"
+          class="feyre-change-btn"
+          onclick="document.getElementById('feyre-tryon-upload').click()">
           📷 Change Photo
         </button>
       </div>
 
-      <button type="button" id="feyre-generate-btn" class="feyre-main-btn" onclick="feyreGenerateTryOn()">
+      <button
+        type="button"
+        id="feyre-generate-btn"
+        class="feyre-main-btn"
+        onclick="feyreGenerateTryOn()">
         Generate My Look
       </button>
 
@@ -136,14 +159,14 @@
         </div>
       </div>
 
-      <div class="feyre-preview-card result-card">
+      <div class="feyre-result-card">
         <img
           id="feyre-result-image"
           class="feyre-result-image"
           src=""
           alt="Try-on result"
-          width="250"
-          height="390">
+          width="230"
+          height="360">
       </div>
 
       <button type="button" class="feyre-main-btn result-cart-btn">
@@ -179,26 +202,46 @@
   .feyre-tryon-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.42);
+    background: rgba(0, 0, 0, .42);
     z-index: 999999;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 18px;
+    padding: 22px;
     box-sizing: border-box;
   }
 
   .feyre-tryon-drawer {
     width: 100%;
-    max-width: 440px;
-    height: min(740px, calc(100vh - 36px));
+    max-width: 430px;
+    height: 760px;
     background: #fff;
     border-radius: 22px;
-    box-shadow: 0 14px 34px rgba(0,0,0,.18);
-    overflow-y: auto;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .18);
     position: relative;
     padding: 20px 22px 22px;
     box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .feyre-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 0;
+  }
+
+  .feyre-close-btn,
+  .feyre-main-btn,
+  .feyre-alt-btn,
+  .feyre-change-btn,
+  .feyre-action-btn,
+  .feyre-back-btn {
+    position: relative;
+    z-index: 20;
   }
 
   .feyre-close-btn {
@@ -220,6 +263,7 @@
     justify-content: space-between;
     gap: 10px;
     margin-bottom: 18px;
+    flex: 0 0 auto;
   }
 
   .feyre-drawer-head h2,
@@ -248,6 +292,7 @@
     justify-content: center;
     align-items: center;
     margin: 4px 0 20px;
+    flex: 0 0 auto;
   }
 
   .feyre-step-circle {
@@ -285,6 +330,7 @@
     color: #1f2937;
     margin-bottom: 8px;
     line-height: 1.2;
+    flex: 0 0 auto;
   }
 
   .feyre-step-subtitle {
@@ -293,32 +339,28 @@
     color: #97a0ac;
     line-height: 1.45;
     margin-bottom: 18px;
+    flex: 0 0 auto;
   }
 
-  .feyre-preview-card {
+  .feyre-preview-card,
+  .feyre-review-card {
     background: #f4f4f6;
     border-radius: 18px;
     padding: 14px;
     text-align: center;
     margin-bottom: 14px;
+    flex: 0 0 auto;
   }
 
   .feyre-product-preview-img,
-  .feyre-review-image,
-  .feyre-result-image {
+  .feyre-review-image {
     display: block;
     width: 100%;
     max-width: 220px;
-    height: 300px;
+    max-height: 320px;
     object-fit: contain;
     margin: 0 auto;
     border-radius: 10px;
-  }
-
-  .feyre-review-image,
-  .feyre-result-image {
-    max-width: 235px;
-    height: 350px;
   }
 
   .feyre-main-btn {
@@ -332,6 +374,7 @@
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 12px;
+    flex: 0 0 auto;
   }
 
   .feyre-main-btn:disabled {
@@ -350,6 +393,7 @@
     font-weight: 600;
     cursor: pointer;
     margin-bottom: 14px;
+    flex: 0 0 auto;
   }
 
   .feyre-change-btn {
@@ -362,7 +406,7 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
   }
 
   .feyre-footer-note {
@@ -371,6 +415,7 @@
     font-size: 11px;
     line-height: 1.45;
     margin-top: 4px;
+    flex: 0 0 auto;
   }
 
   .feyre-footer-note a {
@@ -383,6 +428,7 @@
     color: #c2c6ce;
     font-size: 12px;
     margin-top: 12px;
+    flex: 0 0 auto;
   }
 
   .feyre-powered span {
@@ -394,6 +440,7 @@
     display: flex;
     justify-content: center;
     margin-bottom: 16px;
+    flex: 0 0 auto;
   }
 
   .feyre-loading-frame {
@@ -414,28 +461,28 @@
 
   .feyre-scan-line {
     position: absolute;
-    left: 7%;
-    right: 7%;
+    left: 12px;
+    right: 12px;
     height: 4px;
-    top: 10%;
-    z-index: 2;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.98), transparent);
-    box-shadow: 0 0 18px rgba(255,255,255,.85);
-    animation: feyreScan 1.7s linear infinite;
+    top: 18px;
+    z-index: 5;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,1), transparent);
+    box-shadow: 0 0 18px rgba(255,255,255,.95);
+    animation: feyreScanMove 1.8s linear infinite;
+    will-change: transform;
   }
 
-  @keyframes feyreScan {
-    0% { top: 10%; opacity: .8; }
-    25% { top: 32%; opacity: 1; }
-    50% { top: 55%; opacity: .95; }
-    75% { top: 78%; opacity: 1; }
-    100% { top: 10%; opacity: .8; }
+  @keyframes feyreScanMove {
+    0% { transform: translateY(0); opacity: .95; }
+    50% { transform: translateY(220px); opacity: 1; }
+    100% { transform: translateY(0); opacity: .95; }
   }
 
   .feyre-progress-wrap {
     max-width: 310px;
     margin: 0 auto 14px;
     text-align: center;
+    flex: 0 0 auto;
   }
 
   .feyre-progress-bar {
@@ -478,6 +525,7 @@
     text-align: center;
     font-size: 12px;
     line-height: 1.45;
+    flex: 0 0 auto;
   }
 
   .loading-powered {
@@ -494,8 +542,32 @@
     padding: 0;
   }
 
+  .feyre-result-card {
+    background: #f4f4f6;
+    border-radius: 18px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 14px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feyre-result-image {
+    display: block;
+    width: 100%;
+    max-width: 230px;
+    max-height: 360px;
+    object-fit: contain;
+    margin: 0 auto;
+    border-radius: 10px;
+  }
+
   .result-cart-btn {
-    margin-top: 14px;
+    margin-top: 0;
+    flex: 0 0 auto;
   }
 
   .feyre-result-actions {
@@ -503,6 +575,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-top: 10px;
+    flex: 0 0 auto;
   }
 
   .feyre-action-btn {
@@ -522,6 +595,7 @@
     border: 1px solid #fecdd3;
     border-radius: 14px;
     padding: 14px;
+    flex: 0 0 auto;
   }
 
   .feyre-error-title {
@@ -580,10 +654,10 @@
   }
 
   function feyreShowStep(step) {
-    document.getElementById('feyre-step-1').style.display = step === 1 ? 'block' : 'none';
-    document.getElementById('feyre-step-2').style.display = step === 2 ? 'block' : 'none';
-    document.getElementById('feyre-step-3').style.display = step === 3 ? 'block' : 'none';
-    document.getElementById('feyre-step-4').style.display = step === 4 ? 'block' : 'none';
+    document.getElementById('feyre-step-1').style.display = step === 1 ? 'flex' : 'none';
+    document.getElementById('feyre-step-2').style.display = step === 2 ? 'flex' : 'none';
+    document.getElementById('feyre-step-3').style.display = step === 3 ? 'flex' : 'none';
+    document.getElementById('feyre-step-4').style.display = step === 4 ? 'flex' : 'none';
   }
 
   function feyreHideError() {
@@ -597,21 +671,21 @@
   }
 
   function feyreUpdateCounter() {
-    var text = feyreTryOnCount + ' Try-On';
+    let text = feyreTryOnCount + ' Try-On';
     if (feyreTryOnCount !== 1) text += 's';
     document.getElementById('feyre-counter-text').textContent = text;
-    var finalCounter = document.getElementById('feyre-counter-text-final');
+    const finalCounter = document.getElementById('feyre-counter-text-final');
     if (finalCounter) finalCounter.textContent = text;
   }
 
   function feyreHandlePhotoSelect(event) {
-    var file = event.target.files && event.target.files[0];
+    const file = event.target.files && event.target.files[0];
     if (!file) return;
 
     feyreSelectedFile = file;
     feyreHideError();
 
-    var reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = function(e) {
       document.getElementById('feyre-review-image').src = e.target.result;
       document.getElementById('feyre-loading-image').src = e.target.result;
@@ -628,31 +702,31 @@
 
     const steps = [
       { progress: 12, label: '12% Complete', status: 'Analyzing Your Photo....', note: 'Our AI adjusts for fabric stretch and drape on your body.' },
-      { progress: 26, label: '26% Complete', status: 'Mapping your body shape....', note: 'Understanding your body alignment and proportions.' },
-      { progress: 43, label: '43% Complete', status: 'Matching garment details....', note: 'Adapting the outfit structure to your frame.' },
-      { progress: 61, label: '61% Complete', status: 'Refining folds and drape....', note: 'Improving texture, movement, and fabric fall.' },
-      { progress: 82, label: '82% Complete', status: 'Rendering your final fit....', note: 'Almost ready.' }
+      { progress: 24, label: '24% Complete', status: 'Mapping body shape....', note: 'Understanding your proportions and posture.' },
+      { progress: 39, label: '39% Complete', status: 'Matching garment details....', note: 'Aligning outfit shape and silhouette.' },
+      { progress: 55, label: '55% Complete', status: 'Refining fit and drape....', note: 'Improving folds, edges and garment fall.' },
+      { progress: 71, label: '71% Complete', status: 'Balancing lighting and texture....', note: 'Improving realism and detail.' },
+      { progress: 86, label: '86% Complete', status: 'Rendering final preview....', note: 'Almost ready.' }
     ];
 
     let index = 0;
+
     fill.style.width = steps[0].progress + '%';
     label.textContent = steps[0].label;
     status.textContent = steps[0].status;
     note.textContent = steps[0].note;
 
     feyreStopProgress();
+
     feyreProgressInterval = setInterval(function() {
-      index += 1;
-      if (index >= steps.length) {
-        clearInterval(feyreProgressInterval);
-        feyreProgressInterval = null;
-        return;
-      }
+      index++;
+      if (index >= steps.length) return;
+
       fill.style.width = steps[index].progress + '%';
       label.textContent = steps[index].label;
       status.textContent = steps[index].status;
       note.textContent = steps[index].note;
-    }, 1200);
+    }, 1100);
   }
 
   function feyreStopProgress() {
@@ -668,9 +742,10 @@
   }
 
   function feyreDownloadResult() {
-    var img = document.getElementById('feyre-result-image');
+    const img = document.getElementById('feyre-result-image');
     if (!img || !img.src) return;
-    var a = document.createElement('a');
+
+    const a = document.createElement('a');
     a.href = img.src;
     a.download = 'feyre-tryon-result.png';
     document.body.appendChild(a);
