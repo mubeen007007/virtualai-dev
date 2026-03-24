@@ -60,12 +60,12 @@ export const action = async ({ request }) => {
       input: {
         model_image: modelImageDataUri,
         garment_image: productImage,
-        category: "one-pieces",
-        mode: "balanced",
-        garment_photo_type: "auto",
+        category: "auto",
+        mode: "quality",
+        garment_photo_type: "model",
         moderation_level: "permissive",
-        num_samples: 1,
-        segmentation_free: true,
+        num_samples: 3,
+        segmentation_free: false,
         output_format: "png",
       },
       logs: true,
@@ -76,7 +76,8 @@ export const action = async ({ request }) => {
       },
     });
 
-    const outputImage = result?.data?.images?.[0]?.url;
+    const outputImages = result?.data?.images || [];
+    const outputImage = outputImages[0]?.url;
 
     if (!outputImage) {
       return Response.json(
@@ -93,6 +94,7 @@ export const action = async ({ request }) => {
       success: true,
       message: "Try-on generated successfully",
       resultImage: outputImage,
+      allResultImages: outputImages.map((img) => img.url),
       uploadedFileName: userImage?.name || "unknown-file",
       productImageUsed: productImage,
     });
