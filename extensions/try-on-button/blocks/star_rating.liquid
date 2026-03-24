@@ -13,7 +13,7 @@
 
     <div class="feyre-drawer-head">
       <h2>Try It On</h2>
-      <div id="feyre-tryon-counter" class="feyre-tryon-counter">
+      <div class="feyre-tryon-counter">
         <span class="feyre-counter-icon">◷</span>
         <span id="feyre-counter-text">0 Try-Ons</span>
       </div>
@@ -32,14 +32,14 @@
         Upload a full-body photo to visualize the fit on yourself.
       </div>
 
-      <div class="feyre-product-preview-card">
+      <div class="feyre-preview-card">
         {% if product.featured_image %}
           <img
-            class="feyre-product-preview-img"
+            class="feyre-preview-image"
             src="{{ product.featured_image | image_url: width: 700 }}"
             alt="{{ product.title | escape }}"
-            width="220"
-            height="320">
+            width="210"
+            height="300">
         {% endif %}
       </div>
 
@@ -54,7 +54,7 @@
         + Choose Your Photo
       </button>
 
-      <button type="button" class="feyre-secondary-btn-lite">
+      <button type="button" class="feyre-alt-btn">
         📷 Open Camera
       </button>
 
@@ -67,18 +67,18 @@
 
     <!-- STEP 2 -->
     <div id="feyre-step-2" class="feyre-step" style="display:none;">
-      <div class="feyre-step-title review">Review Your Photo</div>
+      <div class="feyre-step-title review-title">Review Your Photo</div>
 
-      <div class="feyre-review-card">
+      <div class="feyre-preview-card review-card">
         <img
           id="feyre-review-image"
           class="feyre-review-image"
           src=""
           alt="Review photo"
-          width="240"
-          height="360">
+          width="230"
+          height="340">
 
-        <button type="button" class="feyre-change-photo-btn" onclick="document.getElementById('feyre-tryon-upload').click()">
+        <button type="button" class="feyre-change-btn" onclick="document.getElementById('feyre-tryon-upload').click()">
           📷 Change Photo
         </button>
       </div>
@@ -97,7 +97,7 @@
 
     <!-- STEP 3 -->
     <div id="feyre-step-3" class="feyre-step" style="display:none;">
-      <div class="feyre-step-title generating">Generating your fit</div>
+      <div class="feyre-step-title generating-title">Generating your fit</div>
 
       <div class="feyre-loading-card">
         <div class="feyre-loading-frame">
@@ -106,7 +106,7 @@
             id="feyre-loading-image"
             class="feyre-loading-image"
             src=""
-            alt="Loading">
+            alt="Loading preview">
         </div>
       </div>
 
@@ -136,14 +136,14 @@
         </div>
       </div>
 
-      <div class="feyre-result-card">
+      <div class="feyre-preview-card result-card">
         <img
           id="feyre-result-image"
           class="feyre-result-image"
           src=""
           alt="Try-on result"
-          width="260"
-          height="420">
+          width="250"
+          height="390">
       </div>
 
       <button type="button" class="feyre-main-btn result-cart-btn">
@@ -179,36 +179,35 @@
   .feyre-tryon-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.45);
+    background: rgba(0,0,0,.42);
     z-index: 999999;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 20px;
+    padding: 18px;
     box-sizing: border-box;
   }
 
   .feyre-tryon-drawer {
     width: 100%;
-    max-width: 470px;
-    height: calc(100vh - 40px);
-    max-height: 860px;
+    max-width: 440px;
+    height: min(740px, calc(100vh - 36px));
     background: #fff;
-    position: relative;
-    box-shadow: -12px 0 30px rgba(0,0,0,.14);
+    border-radius: 22px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.18);
     overflow-y: auto;
-    border-radius: 24px;
-    padding: 22px 24px 24px;
+    position: relative;
+    padding: 20px 22px 22px;
     box-sizing: border-box;
   }
 
   .feyre-close-btn {
     position: absolute;
-    top: 16px;
-    right: 18px;
+    top: 14px;
+    right: 16px;
     border: 0;
     background: transparent;
-    color: #888;
+    color: #8f939a;
     font-size: 28px;
     line-height: 1;
     cursor: pointer;
@@ -220,13 +219,13 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
 
   .feyre-drawer-head h2,
   .feyre-result-title {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #1f2937;
   }
@@ -234,13 +233,13 @@
   .feyre-tryon-counter {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     background: #eaf7ec;
     color: #2f7a3e;
     border-radius: 999px;
-    padding: 9px 14px;
-    font-size: 13px;
-    font-weight: 600;
+    padding: 8px 13px;
+    font-size: 12px;
+    font-weight: 700;
     white-space: nowrap;
   }
 
@@ -248,21 +247,21 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 6px 0 24px;
+    margin: 4px 0 20px;
   }
 
   .feyre-step-circle {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border: 2px solid #d1d5db;
-    color: #9ca3af;
+    border: 2px solid #d7dbe2;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 20px;
+    color: #a0a7b3;
     background: #fff;
+    font-size: 20px;
+    font-weight: 700;
   }
 
   .feyre-step-circle.active {
@@ -272,66 +271,64 @@
   }
 
   .feyre-step-line {
-    width: 64px;
+    width: 60px;
     height: 3px;
     background: #e5e7eb;
-    margin: 0 10px;
     border-radius: 999px;
+    margin: 0 10px;
   }
 
   .feyre-step-title {
     text-align: center;
-    font-size: 22px;
-    line-height: 1.2;
+    font-size: 20px;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    line-height: 1.2;
   }
 
   .feyre-step-subtitle {
     text-align: center;
-    font-size: 14px;
-    color: #95a0ae;
+    font-size: 13px;
+    color: #97a0ac;
     line-height: 1.45;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
 
-  .feyre-product-preview-card,
-  .feyre-review-card,
-  .feyre-result-card {
-    background: #f5f5f7;
+  .feyre-preview-card {
+    background: #f4f4f6;
     border-radius: 18px;
     padding: 14px;
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
   .feyre-product-preview-img,
   .feyre-review-image,
   .feyre-result-image {
+    display: block;
     width: 100%;
     max-width: 220px;
-    height: 320px;
+    height: 300px;
     object-fit: contain;
-    display: block;
     margin: 0 auto;
-    border-radius: 12px;
+    border-radius: 10px;
   }
 
   .feyre-review-image,
   .feyre-result-image {
-    max-width: 250px;
-    height: 380px;
+    max-width: 235px;
+    height: 350px;
   }
 
   .feyre-main-btn {
     width: 100%;
     border: 0;
-    border-radius: 16px;
+    border-radius: 15px;
     background: #000;
     color: #fff;
-    padding: 17px 18px;
-    font-size: 16px;
+    padding: 16px 16px;
+    font-size: 15px;
     font-weight: 700;
     cursor: pointer;
     margin-bottom: 12px;
@@ -342,38 +339,38 @@
     cursor: not-allowed;
   }
 
-  .feyre-secondary-btn-lite {
+  .feyre-alt-btn {
     width: 100%;
     border: 1px solid #d7dce3;
-    border-radius: 16px;
+    border-radius: 15px;
     background: #fff;
-    color: #4b5563;
-    padding: 17px 18px;
+    color: #5b6470;
+    padding: 16px 16px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     margin-bottom: 14px;
   }
 
-  .feyre-change-photo-btn {
-    margin-top: 14px;
+  .feyre-change-btn {
+    margin-top: 12px;
     border: 0;
     background: #fff;
-    border-radius: 999px;
-    padding: 11px 20px;
-    font-size: 14px;
-    font-weight: 600;
     color: #4b5563;
-    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
   }
 
   .feyre-footer-note {
     text-align: center;
     color: #9ca3af;
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.45;
-    margin-top: 6px;
+    margin-top: 4px;
   }
 
   .feyre-footer-note a {
@@ -383,9 +380,9 @@
 
   .feyre-powered {
     text-align: center;
-    color: #c0c5ce;
-    font-size: 13px;
-    margin-top: 14px;
+    color: #c2c6ce;
+    font-size: 12px;
+    margin-top: 12px;
   }
 
   .feyre-powered span {
@@ -396,13 +393,13 @@
   .feyre-loading-card {
     display: flex;
     justify-content: center;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
   .feyre-loading-frame {
     position: relative;
-    width: 230px;
-    height: 320px;
+    width: 215px;
+    height: 300px;
     border-radius: 22px;
     overflow: hidden;
     background: #111;
@@ -417,35 +414,36 @@
 
   .feyre-scan-line {
     position: absolute;
-    left: 8%;
-    right: 8%;
-    top: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.98), transparent);
-    box-shadow: 0 0 20px rgba(255,255,255,.9);
+    left: 7%;
+    right: 7%;
+    height: 4px;
+    top: 10%;
     z-index: 2;
-    animation: feyreScan 2s linear infinite;
-    will-change: transform, top;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.98), transparent);
+    box-shadow: 0 0 18px rgba(255,255,255,.85);
+    animation: feyreScan 1.7s linear infinite;
   }
 
   @keyframes feyreScan {
-    0% { top: 8%; opacity: .9; }
-    50% { top: 84%; opacity: 1; }
-    100% { top: 8%; opacity: .9; }
+    0% { top: 10%; opacity: .8; }
+    25% { top: 32%; opacity: 1; }
+    50% { top: 55%; opacity: .95; }
+    75% { top: 78%; opacity: 1; }
+    100% { top: 10%; opacity: .8; }
   }
 
   .feyre-progress-wrap {
-    max-width: 330px;
-    margin: 0 auto 16px;
+    max-width: 310px;
+    margin: 0 auto 14px;
     text-align: center;
   }
 
   .feyre-progress-bar {
-    height: 10px;
-    background: #dee2e8;
+    height: 9px;
+    background: #dfe3e8;
     border-radius: 999px;
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .feyre-progress-fill {
@@ -453,51 +451,51 @@
     height: 100%;
     background: #111;
     border-radius: 999px;
-    transition: width .6s ease;
+    transition: width .5s ease;
   }
 
   .feyre-progress-label {
-    color: #a0a7b3;
-    font-size: 14px;
+    color: #a3a9b4;
+    font-size: 13px;
     font-weight: 600;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
 
   .feyre-progress-status {
     color: #374151;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
   }
 
   .feyre-loading-note {
-    max-width: 330px;
-    margin: 18px auto 0;
-    border: 1px solid #e6e8ee;
+    max-width: 310px;
+    margin: 16px auto 0;
+    border: 1px solid #e5e8ee;
     background: #fbfbfc;
     color: #7b8494;
-    border-radius: 16px;
-    padding: 14px 16px;
+    border-radius: 15px;
+    padding: 13px 15px;
     text-align: center;
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.45;
   }
 
   .loading-powered {
-    margin-top: 22px;
+    margin-top: 18px;
   }
 
   .feyre-back-btn {
     border: 0;
     background: transparent;
-    font-size: 34px;
-    line-height: 1;
     color: #4b5563;
+    font-size: 32px;
+    line-height: 1;
     cursor: pointer;
     padding: 0;
   }
 
   .result-cart-btn {
-    margin-top: 16px;
+    margin-top: 14px;
   }
 
   .feyre-result-actions {
@@ -512,23 +510,23 @@
     background: #fff;
     color: #6b7280;
     border-radius: 14px;
-    padding: 14px 10px;
-    font-size: 14px;
+    padding: 13px 8px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
   }
 
   .feyre-error-box {
-    margin-top: 16px;
+    margin-top: 14px;
     background: #fff1f2;
     border: 1px solid #fecdd3;
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 14px;
   }
 
   .feyre-error-title {
     color: #9f1239;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     margin-bottom: 8px;
   }
@@ -549,8 +547,8 @@
     .feyre-tryon-drawer {
       max-width: 100%;
       height: calc(100vh - 20px);
-      border-radius: 20px;
-      padding: 18px 16px 20px;
+      border-radius: 18px;
+      padding: 18px 16px 18px;
     }
 
     .feyre-result-actions {
@@ -623,17 +621,17 @@
   }
 
   function feyreStartProgress() {
-    var fill = document.getElementById('feyre-progress-fill');
-    var label = document.getElementById('feyre-progress-label');
-    var status = document.getElementById('feyre-progress-status');
-    var note = document.getElementById('feyre-loading-note');
+    const fill = document.getElementById('feyre-progress-fill');
+    const label = document.getElementById('feyre-progress-label');
+    const status = document.getElementById('feyre-progress-status');
+    const note = document.getElementById('feyre-loading-note');
 
-    var steps = [
+    const steps = [
       { progress: 12, label: '12% Complete', status: 'Analyzing Your Photo....', note: 'Our AI adjusts for fabric stretch and drape on your body.' },
-      { progress: 28, label: '28% Complete', status: 'Mapping your body shape....', note: 'Balancing silhouette and garment structure.' },
-      { progress: 46, label: '46% Complete', status: 'Matching garment details....', note: 'Preparing the outfit fit on your frame.' },
-      { progress: 67, label: '67% Complete', status: 'Refining folds and drape....', note: 'Improving texture and garment fall.' },
-      { progress: 84, label: '84% Complete', status: 'Rendering your final fit....', note: 'Almost ready.' }
+      { progress: 26, label: '26% Complete', status: 'Mapping your body shape....', note: 'Understanding your body alignment and proportions.' },
+      { progress: 43, label: '43% Complete', status: 'Matching garment details....', note: 'Adapting the outfit structure to your frame.' },
+      { progress: 61, label: '61% Complete', status: 'Refining folds and drape....', note: 'Improving texture, movement, and fabric fall.' },
+      { progress: 82, label: '82% Complete', status: 'Rendering your final fit....', note: 'Almost ready.' }
     ];
 
     let index = 0;
@@ -644,7 +642,7 @@
 
     feyreStopProgress();
     feyreProgressInterval = setInterval(function() {
-      index++;
+      index += 1;
       if (index >= steps.length) {
         clearInterval(feyreProgressInterval);
         feyreProgressInterval = null;
@@ -654,7 +652,7 @@
       label.textContent = steps[index].label;
       status.textContent = steps[index].status;
       note.textContent = steps[index].note;
-    }, 1400);
+    }, 1200);
   }
 
   function feyreStopProgress() {
@@ -690,20 +688,20 @@
     feyreShowStep(3);
     feyreStartProgress();
 
-    var formData = new FormData();
-    var productImage = {{ product.featured_image | image_url: width: 800 | json }};
+    const formData = new FormData();
+    const productImage = {{ product.featured_image | image_url: width: 800 | json }};
 
     formData.append('userImage', feyreSelectedFile);
     formData.append('productImage', productImage);
 
     try {
-      var response = await fetch('/apps/tryon', {
+      const response = await fetch('/apps/tryon', {
         method: 'POST',
         body: formData
       });
 
-      var text = await response.text();
-      var data;
+      const text = await response.text();
+      let data;
 
       try {
         data = JSON.parse(text);
@@ -726,7 +724,7 @@
 
       setTimeout(function() {
         feyreShowStep(4);
-      }, 600);
+      }, 500);
     } catch (error) {
       feyreStopProgress();
       feyreShowStep(2);
