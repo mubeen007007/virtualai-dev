@@ -13,6 +13,12 @@ function fileToDataUri(file) {
   });
 }
 
+function normalizeImageUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  if (url.startsWith("//")) return `https:${url}`;
+  return url;
+}
+
 export const loader = async ({ request }) => {
   await authenticate.public.appProxy(request);
 
@@ -31,7 +37,7 @@ export const action = async ({ request }) => {
 
     const formData = await request.formData();
     const userImage = formData.get("userImage");
-    const productImage = formData.get("productImage");
+    let productImage = formData.get("productImage");
 
     if (!userImage || !productImage) {
       return Response.json(
@@ -48,6 +54,7 @@ export const action = async ({ request }) => {
     }
 
     const modelImageDataUri = await fileToDataUri(userImage);
+    productImage = normalizeImageUrl(productImage);
 
     const result = await fal.subscribe("fal-ai/fashn/tryon/v1.6", {
       input: {
@@ -87,6 +94,7 @@ export const action = async ({ request }) => {
       message: "Try-on generated successfully",
       resultImage: outputImage,
       uploadedFileName: userImage?.name || "unknown-file",
+      productImageUsed: productImage,
     });
   } catch (error) {
     console.error("PROXY TRYON ERROR:", error);
