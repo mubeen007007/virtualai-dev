@@ -12,76 +12,22 @@ function normalizeImageUrl(url) {
   return url;
 }
 
-async function fileToProcessedDataUri(file, options = {}) {
-  const {
-    width = 1024,
-    height = 1536,
-    fit = "contain",
-    background = { r: 255, g: 255, b: 255, alpha: 1 },
-    png = true,
-    sharpen = true,
-    normalize = true,
-  } = options;
-
+async function fileToLightProcessedDataUri(file) {
   const arrayBuffer = await file.arrayBuffer();
-  let image = sharp(Buffer.from(arrayBuffer), { failOn: "none" }).rotate();
 
-  if (normalize) image = image.normalize();
-  if (sharpen) image = image.sharpen();
+  const outputBuffer = await sharp(Buffer.from(arrayBuffer), { failOn: "none" })
+    .rotate()
+    .resize({
+      width: 1200,
+      height: 1600,
+      fit: "inside",
+      withoutEnlargement: true,
+    })
+    .jpeg({ quality: 95 })
+    .toBuffer();
 
-  image = image.resize(width, height, {
-    fit,
-    background,
-    withoutEnlargement: true,
-  });
-
-  const outputBuffer = png
-    ? await image.png({ compressionLevel: 9 }).toBuffer()
-    : await image.jpeg({ quality: 92 }).toBuffer();
-
-  const mime = png ? "image/png" : "image/jpeg";
   const base64 = outputBuffer.toString("base64");
-  return `data:${mime};base64,${base64}`;
-}
-
-async function urlImageToProcessedDataUri(url, options = {}) {
-  const normalizedUrl = normalizeImageUrl(url);
-  const response = await fetch(normalizedUrl);
-
-  if (!response.ok) {
-    throw new Error(`Failed to download garment image: ${response.status}`);
-  }
-
-  const arrayBuffer = await response.arrayBuffer();
-
-  const {
-    width = 1024,
-    height = 1536,
-    fit = "contain",
-    background = { r: 255, g: 255, b: 255, alpha: 1 },
-    png = true,
-    sharpen = true,
-    normalize = true,
-  } = options;
-
-  let image = sharp(Buffer.from(arrayBuffer), { failOn: "none" }).rotate();
-
-  if (normalize) image = image.normalize();
-  if (sharpen) image = image.sharpen();
-
-  image = image.resize(width, height, {
-    fit,
-    background,
-    withoutEnlargement: true,
-  });
-
-  const outputBuffer = png
-    ? await image.png({ compressionLevel: 9 }).toBuffer()
-    : await image.jpeg({ quality: 92 }).toBuffer();
-
-  const mime = png ? "image/png" : "image/jpeg";
-  const base64 = outputBuffer.toString("base64");
-  return `data:${mime};base64,${base64}`;
+  return `data:image/jpeg;base64,${base64}`;
 }
 
 export const loader = async ({ request }) => {
@@ -102,7 +48,7 @@ export const action = async ({ request }) => {
 
     const formData = await request.formData();
     const userImage = formData.get("userImage");
-    const productImage = formData.get("productImage");
+    let productImage = formData.get("productImage");
 
     if (!userImage || !productImage) {
       return Response.json(
@@ -118,51 +64,23 @@ export const action = async ({ request }) => {
       );
     }
 
-    // USER IMAGE PREPROCESSING:
-    // - auto rotate
-    // - normalize brightness/contrast
-    // - sharpen slightly
-    // - resize to a stable portrait canvas
-    const processedUserImage = await fileToProcessedDataUri(userImage, {
-      width: 1024,
-      height: 1536,
-      fit: "contain",
-      background: { r: 255, g: 255, b: 255, alpha: 1 },
-      png: true,
-      sharpen: true,
-      normalize: true,
-    });
+    // Very light processing only on the user image
+    const processedUserImage = await fileToLightProcessedDataUri(userImage);
 
-    // GARMENT IMAGE PREPROCESSING:
-    // - fetch from Shopify
-    // - auto rotate
-    // - normalize brightness/contrast
-    // - sharpen slightly
-    // - resize to stable canvas
-    // - convert to data URI so fal gets a clean valid image input
-    const processedGarmentImage = await urlImageToProcessedDataUri(productImage, {
-      width: 1024,
-      height: 1536,
-      fit: "contain",
-      background: { r: 255, g: 255, b: 255, alpha: 1 },
-      png: true,
-      sharpen: true,
-      normalize: true,
-    });
+    // Do NOT preprocess the garment image
+    productImage = normalizeImageUrl(productImage);
 
     const result = await fal.subscribe("fal-ai/fashn/tryon/v1.6", {
       input: {
         model_image: processedUserImage,
-        garment_image: processedGarmentImage,
+        garment_image: productImage,
         category: "auto",
         mode: "quality",
         garment_photo_type: "model",
         moderation_level: "permissive",
         num_samples: 1,
-        segmentation_free: false,
-        sync_mode: true,
+        segmentation_free: true,
         output_format: "png",
-        seed: 42,
       },
       logs: true,
       onQueueUpdate: (update) => {
