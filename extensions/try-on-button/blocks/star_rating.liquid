@@ -1,409 +1,424 @@
 <div class="feyre-tryon-wrap">
   <button
     type="button"
-    class="feyre-tryon-btn"
-    onclick="feyreOpenTryOn()">
-    Try On
+    class="feyre-tryon-trigger"
+    onclick="feyreOpenTryOnDrawer()">
+    Try It On
   </button>
 </div>
 
-<div id="feyre-tryon-modal" class="feyre-tryon-modal" style="display:none;">
-  <div class="feyre-tryon-shell">
+<div id="feyre-tryon-overlay" class="feyre-tryon-overlay" style="display:none;" onclick="feyreOverlayClose(event)">
+  <div id="feyre-tryon-drawer" class="feyre-tryon-drawer">
+    <button type="button" class="feyre-close-btn" onclick="feyreCloseTryOnDrawer()">×</button>
 
-    <button
-      type="button"
-      class="feyre-tryon-close"
-      onclick="feyreCloseTryOn()">
-      ×
-    </button>
-
-    <div id="feyre-step-upload" class="feyre-step">
-      <div class="feyre-step-head">
-        <h2>Virtual Try On</h2>
-        <p>Upload one clear front-facing photo for the best result.</p>
-      </div>
-
-      <div class="feyre-tryon-grid">
-        {% if product.featured_image %}
-          <div class="feyre-card">
-            <div class="feyre-card-label">Outfit preview</div>
-            <img
-              class="feyre-preview-img"
-              src="{{ product.featured_image | image_url: width: 700 }}"
-              alt="{{ product.title | escape }}"
-              width="320"
-              height="420">
-          </div>
-        {% endif %}
-
-        <div class="feyre-card">
-          <div class="feyre-card-label">Your photo</div>
-
-          <label class="feyre-upload-box" for="feyre-tryon-upload">
-            <span class="feyre-upload-title">Choose your image</span>
-            <span class="feyre-upload-subtitle">Portrait, full body, bright background</span>
-          </label>
-
-          <input
-            type="file"
-            id="feyre-tryon-upload"
-            accept="image/*"
-            onchange="feyrePreviewImage(event)">
-
-          <div id="feyre-file-name" class="feyre-file-name" style="display:none;"></div>
-
-          <div id="feyre-validation-box" class="feyre-validation-box">
-            <div class="feyre-validation-title">Photo requirements</div>
-            <ul class="feyre-validation-list">
-              <li id="rule-type">Upload an image file</li>
-              <li id="rule-size">Under 10MB</li>
-              <li id="rule-resolution">At least 900 × 1200</li>
-              <li id="rule-portrait">Portrait orientation</li>
-              <li id="rule-ratio">Natural full-body portrait ratio</li>
-            </ul>
-          </div>
-
-          <div id="feyre-tryon-preview-wrap" style="display:none;">
-            <img
-              id="feyre-tryon-preview"
-              class="feyre-preview-img"
-              src=""
-              alt="Preview"
-              width="320"
-              height="420">
-          </div>
-        </div>
-      </div>
-
-      <div class="feyre-actions">
-        <button
-          type="button"
-          class="feyre-btn feyre-btn-secondary"
-          onclick="feyreCloseTryOn()">
-          Cancel
-        </button>
-
-        <button
-          type="button"
-          id="feyre-generate-btn"
-          class="feyre-btn feyre-btn-primary"
-          onclick="feyreGenerateTryOn()"
-          disabled>
-          Generate Try On
-        </button>
+    <div class="feyre-drawer-head">
+      <h2>Try It On</h2>
+      <div id="feyre-tryon-counter" class="feyre-tryon-counter">
+        <span class="feyre-counter-icon">◷</span>
+        <span id="feyre-counter-text">0 Try-Ons</span>
       </div>
     </div>
 
-    <div id="feyre-step-loading" class="feyre-step" style="display:none;">
-      <div class="feyre-loading-wrap">
-        <h2>Generating your fit</h2>
+    <!-- STEP 1 -->
+    <div id="feyre-step-1" class="feyre-step">
+      <div class="feyre-step-progress">
+        <div class="feyre-step-circle active">1</div>
+        <div class="feyre-step-line"></div>
+        <div class="feyre-step-circle">2</div>
+      </div>
 
-        <div class="feyre-loading-card">
+      <div class="feyre-step-title">Want to see it on you?</div>
+      <div class="feyre-step-subtitle">
+        Upload a full-body photo to visualize the fit on yourself.
+      </div>
+
+      <div class="feyre-product-preview-card">
+        {% if product.featured_image %}
+          <img
+            class="feyre-product-preview-img"
+            src="{{ product.featured_image | image_url: width: 700 }}"
+            alt="{{ product.title | escape }}"
+            width="260"
+            height="360">
+        {% endif %}
+      </div>
+
+      <input
+        type="file"
+        id="feyre-tryon-upload"
+        accept="image/*"
+        style="display:none;"
+        onchange="feyreHandlePhotoSelect(event)">
+
+      <button type="button" class="feyre-main-btn" onclick="document.getElementById('feyre-tryon-upload').click()">
+        + Choose Your Photo
+      </button>
+
+      <button type="button" class="feyre-secondary-btn-lite">
+        📷 Open Camera
+      </button>
+
+      <div class="feyre-footer-note">
+        By using this service, you agree to our
+        <a href="#" onclick="return false;">Terms & Privacy Policy</a>.<br>
+        Photos are used solely for try-on. AI results may vary.
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="feyre-step-2" class="feyre-step" style="display:none;">
+      <div class="feyre-step-title review">Review Your Photo</div>
+
+      <div class="feyre-review-card">
+        <img
+          id="feyre-review-image"
+          class="feyre-review-image"
+          src=""
+          alt="Review photo"
+          width="280"
+          height="420">
+
+        <button type="button" class="feyre-change-photo-btn" onclick="document.getElementById('feyre-tryon-upload').click()">
+          📷 Change Photo
+        </button>
+      </div>
+
+      <button type="button" id="feyre-generate-btn" class="feyre-main-btn" onclick="feyreGenerateTryOn()">
+        Generate My Look
+      </button>
+
+      <div class="feyre-footer-note compact">
+        By generating a look, you agree to our
+        <a href="#" onclick="return false;">Terms & Privacy Policy</a>.
+      </div>
+
+      <div class="feyre-powered">Powered by <span>FEYRE TryOn</span></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="feyre-step-3" class="feyre-step" style="display:none;">
+      <div class="feyre-step-title generating">Generating your fit</div>
+
+      <div class="feyre-loading-card">
+        <div class="feyre-loading-frame">
           <div class="feyre-scan-line"></div>
           <img
-            id="feyre-loading-preview"
+            id="feyre-loading-image"
+            class="feyre-loading-image"
             src=""
-            alt="Loading preview">
-        </div>
-
-        <div class="feyre-progress-wrap">
-          <div class="feyre-progress-bar">
-            <div id="feyre-progress-fill" class="feyre-progress-fill"></div>
-          </div>
-          <div id="feyre-progress-text" class="feyre-progress-text">12% Complete</div>
-          <div id="feyre-loading-status" class="feyre-loading-status">Analyzing your photo...</div>
-        </div>
-
-        <div class="feyre-loading-note">
-          Lighting is matched to your photo for true fabric colors.
-        </div>
-
-        <div class="feyre-powered">
-          Powered by <span>FEYRE Try On</span>
+            alt="Loading">
         </div>
       </div>
+
+      <div class="feyre-progress-wrap">
+        <div class="feyre-progress-bar">
+          <div id="feyre-progress-fill" class="feyre-progress-fill"></div>
+        </div>
+        <div id="feyre-progress-label" class="feyre-progress-label">35% Complete</div>
+        <div id="feyre-progress-status" class="feyre-progress-status">Analyzing Your Photo....</div>
+      </div>
+
+      <div id="feyre-loading-note" class="feyre-loading-note">
+        Our AI adjusts for fabric stretch and drape on your body.
+      </div>
+
+      <div class="feyre-powered loading-powered">Powered by <span>FEYRE TryOn</span></div>
     </div>
 
-    <div id="feyre-step-result" class="feyre-step" style="display:none;">
-      <div class="feyre-step-head feyre-result-head">
-        <h2>Your try-on preview</h2>
-        <p>Here is your generated look.</p>
+    <!-- STEP 4 -->
+    <div id="feyre-step-4" class="feyre-step" style="display:none;">
+      <div class="feyre-result-head">
+        <button type="button" class="feyre-back-btn" onclick="feyreBackToReview()">‹</button>
+        <div class="feyre-result-title">Here Is Your Fit</div>
+        <div class="feyre-tryon-counter">
+          <span class="feyre-counter-icon">◷</span>
+          <span id="feyre-counter-text-final">1 Try-On</span>
+        </div>
       </div>
 
-      <div class="feyre-result-image-wrap">
+      <div class="feyre-result-card">
         <img
           id="feyre-result-image"
           class="feyre-result-image"
           src=""
-          alt="Generated try-on result"
-          width="420"
-          height="560">
+          alt="Try-on result"
+          width="320"
+          height="500">
       </div>
 
-      <div class="feyre-actions feyre-result-actions">
-        <button
-          type="button"
-          class="feyre-btn feyre-btn-secondary"
-          onclick="feyreBackToUpload()">
-          Try another photo
-        </button>
+      <button type="button" class="feyre-main-btn result-cart-btn">
+        👜 Add To Cart — {{ product.price | money }}
+      </button>
 
-        <button
-          type="button"
-          class="feyre-btn feyre-btn-primary"
-          onclick="feyreCloseTryOn()">
-          Done
-        </button>
+      <div class="feyre-result-actions">
+        <button type="button" class="feyre-action-btn">⇪ Share</button>
+        <button type="button" class="feyre-action-btn" onclick="feyreDownloadResult()">⇩ Save</button>
+        <button type="button" class="feyre-action-btn" onclick="feyreCloseTryOnDrawer()">↗ View Product</button>
       </div>
     </div>
 
     <div id="feyre-error-box" class="feyre-error-box" style="display:none;">
-      <div class="feyre-error-title">Photo rejected</div>
+      <div class="feyre-error-title">Something went wrong</div>
       <pre id="feyre-error-text"></pre>
     </div>
-
   </div>
 </div>
 
 <style>
-  .feyre-tryon-btn {
-    padding: 13px 24px;
+  .feyre-tryon-trigger {
+    padding: 12px 22px;
+    border: 0;
+    border-radius: 10px;
     background: #111;
     color: #fff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
     font-size: 15px;
     font-weight: 600;
-    transition: all .2s ease;
+    cursor: pointer;
   }
 
-  .feyre-tryon-btn:hover {
-    opacity: .92;
-    transform: translateY(-1px);
-  }
-
-  .feyre-tryon-modal {
+  .feyre-tryon-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 18, 26, 0.58);
+    background: rgba(0,0,0,.45);
+    z-index: 999999;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 99999;
-    padding: 24px;
-    backdrop-filter: blur(4px);
+    justify-content: flex-end;
   }
 
-  .feyre-tryon-shell {
-    position: relative;
+  .feyre-tryon-drawer {
     width: 100%;
-    max-width: 1080px;
-    max-height: 92vh;
+    max-width: 560px;
+    height: 100vh;
+    background: #fff;
+    position: relative;
+    box-shadow: -12px 0 30px rgba(0,0,0,.14);
     overflow-y: auto;
-    background: #f6f6f7;
-    border-radius: 26px;
-    padding: 34px;
-    box-shadow: 0 25px 70px rgba(0,0,0,.18);
+    padding: 24px 28px 28px;
   }
 
-  .feyre-tryon-close {
+  .feyre-close-btn {
     position: absolute;
     top: 18px;
     right: 20px;
-    border: none;
+    border: 0;
     background: transparent;
-    font-size: 34px;
+    color: #888;
+    font-size: 32px;
     line-height: 1;
     cursor: pointer;
-    color: #8b8f98;
   }
 
-  .feyre-step-head {
-    text-align: left;
+  .feyre-drawer-head,
+  .feyre-result-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-bottom: 24px;
   }
 
-  .feyre-step-head h2 {
-    margin: 0 0 8px;
-    font-size: 28px;
-    font-weight: 700;
-    color: #1f2937;
-  }
-
-  .feyre-step-head p {
+  .feyre-drawer-head h2,
+  .feyre-result-title {
     margin: 0;
-    font-size: 16px;
-    color: #6b7280;
-  }
-
-  .feyre-tryon-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  .feyre-card {
-    background: #fff;
-    border: 1px solid #e7e8ec;
-    border-radius: 22px;
-    padding: 20px;
-    box-shadow: 0 8px 24px rgba(16,24,40,.04);
-  }
-
-  .feyre-card-label {
-    font-size: 15px;
+    font-size: 24px;
     font-weight: 700;
     color: #1f2937;
-    margin-bottom: 14px;
   }
 
-  .feyre-preview-img,
-  .feyre-result-image {
-    width: 100%;
-    height: 420px;
-    object-fit: contain;
-    background: #fafafa;
-    border-radius: 18px;
-    display: block;
+  .feyre-tryon-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eaf7ec;
+    color: #2f7a3e;
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
-  .feyre-upload-box {
+  .feyre-counter-icon {
+    font-size: 14px;
+  }
+
+  .feyre-step-progress {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 130px;
-    border: 2px dashed #d5d9e2;
-    border-radius: 18px;
-    background: #fbfbfc;
+    margin: 10px 0 28px;
+  }
+
+  .feyre-step-circle {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 22px;
+    background: #fff;
+  }
+
+  .feyre-step-circle.active {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+  }
+
+  .feyre-step-line {
+    width: 70px;
+    height: 3px;
+    background: #e5e7eb;
+    margin: 0 10px;
+    border-radius: 999px;
+  }
+
+  .feyre-step-title {
     text-align: center;
-    padding: 18px;
-    cursor: pointer;
-    margin-bottom: 14px;
-  }
-
-  .feyre-upload-title {
-    font-size: 16px;
+    font-size: 28px;
+    line-height: 1.2;
     font-weight: 700;
-    color: #111827;
-  }
-
-  .feyre-upload-subtitle {
-    margin-top: 6px;
-    font-size: 13px;
-    color: #6b7280;
-  }
-
-  #feyre-tryon-upload {
-    display: none;
-  }
-
-  .feyre-file-name {
-    font-size: 14px;
-    color: #4b5563;
-    margin-bottom: 14px;
-    word-break: break-word;
-  }
-
-  .feyre-validation-box {
-    border: 1px solid #e5e7eb;
-    background: #fbfbfc;
-    border-radius: 16px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
-  }
-
-  .feyre-validation-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #111827;
+    color: #1f2937;
     margin-bottom: 10px;
   }
 
-  .feyre-validation-list {
-    margin: 0;
-    padding-left: 18px;
+  .feyre-step-title.review,
+  .feyre-step-title.generating {
+    margin-top: 14px;
   }
 
-  .feyre-validation-list li {
-    color: #6b7280;
-    margin-bottom: 6px;
-  }
-
-  .feyre-rule-pass {
-    color: #15803d !important;
-    font-weight: 600;
-  }
-
-  .feyre-rule-fail {
-    color: #b91c1c !important;
-    font-weight: 600;
-  }
-
-  .feyre-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 24px;
-  }
-
-  .feyre-btn {
-    min-width: 150px;
-    padding: 14px 22px;
-    border-radius: 14px;
-    cursor: pointer;
+  .feyre-step-subtitle {
+    text-align: center;
     font-size: 15px;
-    font-weight: 600;
-    transition: all .2s ease;
+    color: #95a0ae;
+    line-height: 1.5;
+    margin-bottom: 26px;
   }
 
-  .feyre-btn:disabled {
-    opacity: .5;
+  .feyre-product-preview-card,
+  .feyre-review-card,
+  .feyre-result-card {
+    background: #f5f5f7;
+    border-radius: 20px;
+    padding: 18px;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .feyre-product-preview-img,
+  .feyre-review-image,
+  .feyre-result-image {
+    width: 100%;
+    max-width: 280px;
+    height: 380px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    border-radius: 12px;
+  }
+
+  .feyre-review-image,
+  .feyre-result-image {
+    max-width: 300px;
+    height: 460px;
+  }
+
+  .feyre-main-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 16px;
+    background: #000;
+    color: #fff;
+    padding: 18px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 14px;
+  }
+
+  .feyre-main-btn:disabled {
+    opacity: .65;
     cursor: not-allowed;
   }
 
-  .feyre-btn-primary {
-    background: #111827;
-    color: #fff;
-    border: none;
-  }
-
-  .feyre-btn-secondary {
+  .feyre-secondary-btn-lite {
+    width: 100%;
+    border: 1px solid #d7dce3;
+    border-radius: 16px;
     background: #fff;
-    color: #111827;
-    border: 1px solid #d6d8de;
+    color: #4b5563;
+    padding: 18px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 16px;
   }
 
-  .feyre-loading-wrap {
-    max-width: 700px;
-    margin: 0 auto;
+  .feyre-change-photo-btn {
+    margin-top: 14px;
+    border: 0;
+    background: #fff;
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #4b5563;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    cursor: pointer;
+  }
+
+  .feyre-footer-note {
     text-align: center;
-    padding: 8px 0 10px;
+    color: #9ca3af;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 8px;
   }
 
-  .feyre-loading-wrap h2 {
-    margin: 0 0 26px;
-    font-size: 34px;
-    font-weight: 800;
-    color: #1f2937;
+  .feyre-footer-note.compact {
+    margin-top: 6px;
+  }
+
+  .feyre-footer-note a {
+    color: #6d5dd3;
+    text-decoration: underline;
+  }
+
+  .feyre-powered {
+    text-align: center;
+    color: #c0c5ce;
+    font-size: 14px;
+    margin-top: 14px;
+  }
+
+  .feyre-powered span {
+    color: #6d5dd3;
+    font-weight: 700;
   }
 
   .feyre-loading-card {
-    position: relative;
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto 28px;
-    border-radius: 26px;
-    overflow: hidden;
-    background: #111;
-    box-shadow: 0 14px 38px rgba(17,24,39,.18);
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
   }
 
-  .feyre-loading-card img {
+  .feyre-loading-frame {
+    position: relative;
+    width: 260px;
+    height: 360px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #111;
+    padding: 0;
+  }
+
+  .feyre-loading-image {
     width: 100%;
-    height: 520px;
+    height: 100%;
     object-fit: cover;
     display: block;
   }
@@ -415,110 +430,114 @@
     top: 18%;
     height: 3px;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
-    box-shadow: 0 0 20px rgba(255,255,255,.8);
-    animation: feyreScan 2.2s linear infinite;
+    box-shadow: 0 0 16px rgba(255,255,255,.7);
     z-index: 2;
+    animation: feyreScan 2s linear infinite;
   }
 
   @keyframes feyreScan {
     0% { top: 10%; }
-    50% { top: 82%; }
+    50% { top: 85%; }
     100% { top: 10%; }
   }
 
   .feyre-progress-wrap {
-    max-width: 600px;
-    margin: 0 auto 22px;
+    max-width: 360px;
+    margin: 0 auto 18px;
+    text-align: center;
   }
 
   .feyre-progress-bar {
-    height: 12px;
-    background: #d9dde5;
+    height: 10px;
+    background: #dee2e8;
     border-radius: 999px;
     overflow: hidden;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
 
   .feyre-progress-fill {
-    height: 100%;
     width: 12%;
+    height: 100%;
     background: #111;
     border-radius: 999px;
     transition: width .4s ease;
   }
 
-  .feyre-progress-text {
-    font-size: 18px;
+  .feyre-progress-label {
+    color: #a0a7b3;
+    font-size: 14px;
     font-weight: 600;
-    color: #9aa1ad;
     margin-bottom: 6px;
   }
 
-  .feyre-loading-status {
-    font-size: 18px;
+  .feyre-progress-status {
+    color: #374151;
+    font-size: 15px;
     font-weight: 700;
-    color: #334155;
   }
 
   .feyre-loading-note {
-    max-width: 620px;
-    margin: 28px auto 0;
-    padding: 18px 20px;
-    border: 1px solid #e4e7ee;
-    border-radius: 20px;
+    max-width: 360px;
+    margin: 18px auto 0;
+    border: 1px solid #e6e8ee;
     background: #fbfbfc;
     color: #7b8494;
-    font-size: 15px;
-    line-height: 1.5;
-  }
-
-  .feyre-powered {
-    margin-top: 30px;
-    color: #b0b6c2;
-    font-size: 16px;
-  }
-
-  .feyre-powered span {
-    color: #6d5dd3;
-    font-weight: 700;
-  }
-
-  .feyre-result-head {
+    border-radius: 16px;
+    padding: 16px 18px;
     text-align: center;
+    font-size: 14px;
+    line-height: 1.45;
   }
 
-  .feyre-result-image-wrap {
-    max-width: 460px;
-    margin: 0 auto;
-    background: #fff;
-    border: 1px solid #e7e8ec;
-    border-radius: 24px;
-    padding: 18px;
-    box-shadow: 0 8px 24px rgba(16,24,40,.04);
+  .loading-powered {
+    margin-top: 26px;
   }
 
-  .feyre-result-image {
-    height: 560px;
-    border-radius: 18px;
+  .feyre-back-btn {
+    border: 0;
+    background: transparent;
+    font-size: 42px;
+    line-height: 1;
+    color: #4b5563;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .result-cart-btn {
+    margin-top: 18px;
   }
 
   .feyre-result-actions {
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .feyre-action-btn {
+    border: 1px solid #d7dce3;
+    background: #fff;
+    color: #6b7280;
+    border-radius: 14px;
+    padding: 16px 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
   }
 
   .feyre-error-box {
-    margin-top: 20px;
-    padding: 18px;
-    border-radius: 18px;
+    margin-top: 18px;
     background: #fff1f2;
     border: 1px solid #fecdd3;
+    border-radius: 16px;
+    padding: 16px;
   }
 
   .feyre-error-title {
+    color: #9f1239;
     font-size: 16px;
     font-weight: 700;
-    color: #9f1239;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .feyre-error-box pre {
@@ -529,64 +548,61 @@
     color: #881337;
   }
 
-  @media (max-width: 768px) {
-    .feyre-tryon-shell {
-      padding: 24px 16px;
-      border-radius: 20px;
+  @media (max-width: 640px) {
+    .feyre-tryon-drawer {
+      max-width: 100%;
+      padding: 20px 18px 24px;
     }
 
-    .feyre-tryon-grid {
-      grid-template-columns: 1fr;
+    .feyre-drawer-head h2,
+    .feyre-result-title {
+      font-size: 22px;
     }
 
-    .feyre-preview-img {
-      height: 320px;
+    .feyre-step-title {
+      font-size: 24px;
     }
 
-    .feyre-loading-card img,
+    .feyre-product-preview-img,
+    .feyre-review-image,
     .feyre-result-image {
-      height: 420px;
+      max-width: 100%;
+      height: 360px;
     }
 
-    .feyre-actions,
     .feyre-result-actions {
-      flex-direction: column;
-    }
-
-    .feyre-btn {
-      width: 100%;
-    }
-
-    .feyre-loading-wrap h2 {
-      font-size: 28px;
+      grid-template-columns: 1fr;
     }
   }
 </style>
 
 <script>
   let feyreProgressInterval = null;
-  let feyreValidationPassed = false;
+  let feyreTryOnCount = 0;
+  let feyreSelectedFile = null;
 
-  function feyreOpenTryOn() {
-    document.getElementById('feyre-tryon-modal').style.display = 'flex';
-    feyreShowStep('upload');
+  function feyreOpenTryOnDrawer() {
+    document.getElementById('feyre-tryon-overlay').style.display = 'flex';
+    feyreShowStep(1);
     feyreHideError();
   }
 
-  function feyreCloseTryOn() {
-    document.getElementById('feyre-tryon-modal').style.display = 'none';
-    feyreStopFakeProgress();
+  function feyreCloseTryOnDrawer() {
+    document.getElementById('feyre-tryon-overlay').style.display = 'none';
+    feyreStopProgress();
   }
 
-  function feyreBackToUpload() {
-    feyreShowStep('upload');
-    feyreHideError();
+  function feyreOverlayClose(event) {
+    if (event.target.id === 'feyre-tryon-overlay') {
+      feyreCloseTryOnDrawer();
+    }
   }
 
   function feyreShowStep(step) {
-    document.getElementById('feyre-step-upload').style.display = step === 'upload' ? 'block' : 'none';
-    document.getElementById('feyre-step-loading').style.display = step === 'loading' ? 'block' : 'none';
-    document.getElementById('feyre-step-result').style.display = step === 'result' ? 'block' : 'none';
+    document.getElementById('feyre-step-1').style.display = step === 1 ? 'block' : 'none';
+    document.getElementById('feyre-step-2').style.display = step === 2 ? 'block' : 'none';
+    document.getElementById('feyre-step-3').style.display = step === 3 ? 'block' : 'none';
+    document.getElementById('feyre-step-4').style.display = step === 4 ? 'block' : 'none';
   }
 
   function feyreHideError() {
@@ -599,103 +615,51 @@
     document.getElementById('feyre-error-text').textContent = message || 'Unknown error';
   }
 
-  function feyreSetRule(id, passed, passText, failText) {
-    var el = document.getElementById(id);
-    el.classList.remove('feyre-rule-pass', 'feyre-rule-fail');
-    el.classList.add(passed ? 'feyre-rule-pass' : 'feyre-rule-fail');
-    el.textContent = passed ? '✓ ' + passText : '✕ ' + failText;
+  function feyreUpdateCounter() {
+    var text = feyreTryOnCount + ' Try-On';
+    if (feyreTryOnCount !== 1) text += 's';
+    document.getElementById('feyre-counter-text').textContent = text;
+    var finalCounter = document.getElementById('feyre-counter-text-final');
+    if (finalCounter) finalCounter.textContent = text;
   }
 
-  function feyreUpdateGenerateState() {
-    document.getElementById('feyre-generate-btn').disabled = !feyreValidationPassed;
-  }
-
-  async function feyrePreviewImage(event) {
+  function feyreHandlePhotoSelect(event) {
     var file = event.target.files && event.target.files[0];
     if (!file) return;
 
+    feyreSelectedFile = file;
     feyreHideError();
-    feyreValidationPassed = false;
-    feyreUpdateGenerateState();
-
-    var fileName = document.getElementById('feyre-file-name');
-    fileName.textContent = file.name;
-    fileName.style.display = 'block';
-
-    var isImage = file.type.startsWith('image/');
-    var isUnderSize = file.size <= 10 * 1024 * 1024;
-
-    feyreSetRule('rule-type', isImage, 'Image file selected', 'Please upload an image file');
-    feyreSetRule('rule-size', isUnderSize, 'File size is under 10MB', 'Image must be under 10MB');
-
-    if (!isImage || !isUnderSize) {
-      feyreShowError('Please upload one clear image under 10MB.');
-      return;
-    }
 
     var reader = new FileReader();
     reader.onload = function(e) {
-      var previewImage = document.getElementById('feyre-tryon-preview');
-      var previewWrap = document.getElementById('feyre-tryon-preview-wrap');
-      var loadingPreview = document.getElementById('feyre-loading-preview');
-
-      var img = new Image();
-      img.onload = function() {
-        var width = img.width;
-        var height = img.height;
-        var aspectRatio = width / height;
-
-        var goodResolution = width >= 900 && height >= 1200;
-        var portrait = height > width;
-        var goodRatio = aspectRatio >= 0.5 && aspectRatio <= 0.85;
-
-        feyreSetRule('rule-resolution', goodResolution, 'Resolution looks good', 'Please upload a clearer high-resolution photo');
-        feyreSetRule('rule-portrait', portrait, 'Portrait orientation looks good', 'Please upload a portrait photo');
-        feyreSetRule('rule-ratio', goodRatio, 'Full-body portrait framing looks good', 'Please upload a straight full-body portrait');
-
-        if (!goodResolution || !portrait || !goodRatio) {
-          feyreValidationPassed = false;
-          feyreUpdateGenerateState();
-          feyreShowError('Please upload a front-facing full-body portrait photo with better framing.');
-          return;
-        }
-
-        previewImage.src = e.target.result;
-        previewWrap.style.display = 'block';
-
-        if (loadingPreview) {
-          loadingPreview.src = e.target.result;
-        }
-
-        feyreValidationPassed = true;
-        feyreUpdateGenerateState();
-      };
-
-      img.src = e.target.result;
+      document.getElementById('feyre-review-image').src = e.target.result;
+      document.getElementById('feyre-loading-image').src = e.target.result;
+      feyreShowStep(2);
     };
-
     reader.readAsDataURL(file);
   }
 
-  function feyreStartFakeProgress() {
+  function feyreStartProgress() {
     var fill = document.getElementById('feyre-progress-fill');
-    var text = document.getElementById('feyre-progress-text');
-    var status = document.getElementById('feyre-loading-status');
+    var label = document.getElementById('feyre-progress-label');
+    var status = document.getElementById('feyre-progress-status');
+    var note = document.getElementById('feyre-loading-note');
 
     var steps = [
-      { progress: 12, label: '12% Complete', status: 'Analyzing your photo...' },
-      { progress: 28, label: '28% Complete', status: 'Detecting body shape...' },
-      { progress: 46, label: '46% Complete', status: 'Matching garment details...' },
-      { progress: 68, label: '68% Complete', status: 'Adapting lighting and folds...' },
-      { progress: 84, label: '84% Complete', status: 'Rendering final preview...' }
+      { progress: 18, label: '18% Complete', status: 'Analyzing Your Photo....', note: 'Our AI adjusts for fabric stretch and drape on your body.' },
+      { progress: 35, label: '35% Complete', status: 'Mapping your body shape....', note: 'Balancing silhouette and garment structure.' },
+      { progress: 58, label: '58% Complete', status: 'Matching fabric movement....', note: 'Lighting and details are being refined.' },
+      { progress: 78, label: '78% Complete', status: 'Refining fit and texture....', note: 'Preparing your final look preview.' },
+      { progress: 92, label: '92% Complete', status: 'Finalizing your fit....', note: 'Almost ready.' }
     ];
 
     var index = 0;
     fill.style.width = steps[0].progress + '%';
-    text.textContent = steps[0].label;
+    label.textContent = steps[0].label;
     status.textContent = steps[0].status;
+    note.textContent = steps[0].note;
 
-    feyreStopFakeProgress();
+    feyreStopProgress();
     feyreProgressInterval = setInterval(function() {
       index++;
       if (index >= steps.length) {
@@ -703,43 +667,49 @@
         return;
       }
       fill.style.width = steps[index].progress + '%';
-      text.textContent = steps[index].label;
+      label.textContent = steps[index].label;
       status.textContent = steps[index].status;
-    }, 1800);
+      note.textContent = steps[index].note;
+    }, 1700);
   }
 
-  function feyreStopFakeProgress() {
+  function feyreStopProgress() {
     if (feyreProgressInterval) {
       clearInterval(feyreProgressInterval);
       feyreProgressInterval = null;
     }
   }
 
+  function feyreBackToReview() {
+    feyreShowStep(2);
+    feyreHideError();
+  }
+
+  function feyreDownloadResult() {
+    var img = document.getElementById('feyre-result-image');
+    if (!img || !img.src) return;
+    var a = document.createElement('a');
+    a.href = img.src;
+    a.download = 'feyre-tryon-result.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   async function feyreGenerateTryOn() {
-    var uploadInput = document.getElementById('feyre-tryon-upload');
-    var resultImage = document.getElementById('feyre-result-image');
-    var generateBtn = document.getElementById('feyre-generate-btn');
-
-    if (!uploadInput || !uploadInput.files || !uploadInput.files[0]) {
-      alert('Please choose your photo first.');
-      return;
-    }
-
-    if (!feyreValidationPassed) {
-      feyreShowError('Please upload a clearer front-facing full-body photo.');
+    if (!feyreSelectedFile) {
+      feyreShowError('Please choose a photo first.');
       return;
     }
 
     feyreHideError();
-    feyreShowStep('loading');
-    feyreStartFakeProgress();
-    generateBtn.disabled = true;
-
-    var userFile = uploadInput.files[0];
-    var productImage = {{ product.featured_image | image_url: width: 800 | json }};
+    feyreShowStep(3);
+    feyreStartProgress();
 
     var formData = new FormData();
-    formData.append('userImage', userFile);
+    var productImage = {{ product.featured_image | image_url: width: 800 | json }};
+
+    formData.append('userImage', feyreSelectedFile);
     formData.append('productImage', productImage);
 
     try {
@@ -749,8 +719,8 @@
       });
 
       var text = await response.text();
-
       var data;
+
       try {
         data = JSON.parse(text);
       } catch (e) {
@@ -761,21 +731,22 @@
         throw new Error(data.error || 'Generation failed');
       }
 
-      feyreStopFakeProgress();
+      feyreStopProgress();
       document.getElementById('feyre-progress-fill').style.width = '100%';
-      document.getElementById('feyre-progress-text').textContent = '100% Complete';
-      document.getElementById('feyre-loading-status').textContent = 'Preview ready';
+      document.getElementById('feyre-progress-label').textContent = '100% Complete';
+      document.getElementById('feyre-progress-status').textContent = 'Preview ready';
 
-      resultImage.src = data.resultImage;
+      document.getElementById('feyre-result-image').src = data.resultImage;
+      feyreTryOnCount += 1;
+      feyreUpdateCounter();
+
       setTimeout(function() {
-        feyreShowStep('result');
+        feyreShowStep(4);
       }, 700);
     } catch (error) {
-      feyreStopFakeProgress();
-      feyreShowStep('upload');
+      feyreStopProgress();
+      feyreShowStep(2);
       feyreShowError(error.message || 'Unknown error');
-    } finally {
-      generateBtn.disabled = !feyreValidationPassed;
     }
   }
 </script>
