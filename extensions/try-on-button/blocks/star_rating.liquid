@@ -17,11 +17,10 @@
       ×
     </button>
 
-    <!-- STEP 1: UPLOAD -->
     <div id="feyre-step-upload" class="feyre-step">
       <div class="feyre-step-head">
         <h2>Virtual Try On</h2>
-        <p>Upload your photo to preview this outfit.</p>
+        <p>Upload one clear front-facing photo for the best result.</p>
       </div>
 
       <div class="feyre-tryon-grid">
@@ -42,7 +41,7 @@
 
           <label class="feyre-upload-box" for="feyre-tryon-upload">
             <span class="feyre-upload-title">Choose your image</span>
-            <span class="feyre-upload-subtitle">Front-facing photo works best</span>
+            <span class="feyre-upload-subtitle">Portrait, full body, bright background</span>
           </label>
 
           <input
@@ -52,6 +51,17 @@
             onchange="feyrePreviewImage(event)">
 
           <div id="feyre-file-name" class="feyre-file-name" style="display:none;"></div>
+
+          <div id="feyre-validation-box" class="feyre-validation-box">
+            <div class="feyre-validation-title">Photo requirements</div>
+            <ul class="feyre-validation-list">
+              <li id="rule-type">Upload an image file</li>
+              <li id="rule-size">Under 10MB</li>
+              <li id="rule-resolution">At least 900 × 1200</li>
+              <li id="rule-portrait">Portrait orientation</li>
+              <li id="rule-ratio">Natural full-body portrait ratio</li>
+            </ul>
+          </div>
 
           <div id="feyre-tryon-preview-wrap" style="display:none;">
             <img
@@ -77,13 +87,13 @@
           type="button"
           id="feyre-generate-btn"
           class="feyre-btn feyre-btn-primary"
-          onclick="feyreGenerateTryOn()">
+          onclick="feyreGenerateTryOn()"
+          disabled>
           Generate Try On
         </button>
       </div>
     </div>
 
-    <!-- STEP 2: LOADING -->
     <div id="feyre-step-loading" class="feyre-step" style="display:none;">
       <div class="feyre-loading-wrap">
         <h2>Generating your fit</h2>
@@ -114,7 +124,6 @@
       </div>
     </div>
 
-    <!-- STEP 3: RESULT -->
     <div id="feyre-step-result" class="feyre-step" style="display:none;">
       <div class="feyre-step-head feyre-result-head">
         <h2>Your try-on preview</h2>
@@ -148,9 +157,8 @@
       </div>
     </div>
 
-    <!-- ERROR -->
     <div id="feyre-error-box" class="feyre-error-box" style="display:none;">
-      <div class="feyre-error-title">Something went wrong</div>
+      <div class="feyre-error-title">Photo rejected</div>
       <pre id="feyre-error-text"></pre>
     </div>
 
@@ -299,6 +307,41 @@
     word-break: break-word;
   }
 
+  .feyre-validation-box {
+    border: 1px solid #e5e7eb;
+    background: #fbfbfc;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .feyre-validation-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 10px;
+  }
+
+  .feyre-validation-list {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .feyre-validation-list li {
+    color: #6b7280;
+    margin-bottom: 6px;
+  }
+
+  .feyre-rule-pass {
+    color: #15803d !important;
+    font-weight: 600;
+  }
+
+  .feyre-rule-fail {
+    color: #b91c1c !important;
+    font-weight: 600;
+  }
+
   .feyre-actions {
     display: flex;
     justify-content: flex-end;
@@ -317,7 +360,7 @@
   }
 
   .feyre-btn:disabled {
-    opacity: .65;
+    opacity: .5;
     cursor: not-allowed;
   }
 
@@ -355,7 +398,6 @@
     border-radius: 26px;
     overflow: hidden;
     background: #111;
-    padding: 0;
     box-shadow: 0 14px 38px rgba(17,24,39,.18);
   }
 
@@ -523,6 +565,7 @@
 
 <script>
   let feyreProgressInterval = null;
+  let feyreValidationPassed = false;
 
   function feyreOpenTryOn() {
     document.getElementById('feyre-tryon-modal').style.display = 'flex';
@@ -556,13 +599,39 @@
     document.getElementById('feyre-error-text').textContent = message || 'Unknown error';
   }
 
-  function feyrePreviewImage(event) {
+  function feyreSetRule(id, passed, passText, failText) {
+    var el = document.getElementById(id);
+    el.classList.remove('feyre-rule-pass', 'feyre-rule-fail');
+    el.classList.add(passed ? 'feyre-rule-pass' : 'feyre-rule-fail');
+    el.textContent = passed ? '✓ ' + passText : '✕ ' + failText;
+  }
+
+  function feyreUpdateGenerateState() {
+    document.getElementById('feyre-generate-btn').disabled = !feyreValidationPassed;
+  }
+
+  async function feyrePreviewImage(event) {
     var file = event.target.files && event.target.files[0];
     if (!file) return;
+
+    feyreHideError();
+    feyreValidationPassed = false;
+    feyreUpdateGenerateState();
 
     var fileName = document.getElementById('feyre-file-name');
     fileName.textContent = file.name;
     fileName.style.display = 'block';
+
+    var isImage = file.type.startsWith('image/');
+    var isUnderSize = file.size <= 10 * 1024 * 1024;
+
+    feyreSetRule('rule-type', isImage, 'Image file selected', 'Please upload an image file');
+    feyreSetRule('rule-size', isUnderSize, 'File size is under 10MB', 'Image must be under 10MB');
+
+    if (!isImage || !isUnderSize) {
+      feyreShowError('Please upload one clear image under 10MB.');
+      return;
+    }
 
     var reader = new FileReader();
     reader.onload = function(e) {
@@ -570,15 +639,41 @@
       var previewWrap = document.getElementById('feyre-tryon-preview-wrap');
       var loadingPreview = document.getElementById('feyre-loading-preview');
 
-      if (previewImage && previewWrap) {
+      var img = new Image();
+      img.onload = function() {
+        var width = img.width;
+        var height = img.height;
+        var aspectRatio = width / height;
+
+        var goodResolution = width >= 900 && height >= 1200;
+        var portrait = height > width;
+        var goodRatio = aspectRatio >= 0.5 && aspectRatio <= 0.85;
+
+        feyreSetRule('rule-resolution', goodResolution, 'Resolution looks good', 'Please upload a clearer high-resolution photo');
+        feyreSetRule('rule-portrait', portrait, 'Portrait orientation looks good', 'Please upload a portrait photo');
+        feyreSetRule('rule-ratio', goodRatio, 'Full-body portrait framing looks good', 'Please upload a straight full-body portrait');
+
+        if (!goodResolution || !portrait || !goodRatio) {
+          feyreValidationPassed = false;
+          feyreUpdateGenerateState();
+          feyreShowError('Please upload a front-facing full-body portrait photo with better framing.');
+          return;
+        }
+
         previewImage.src = e.target.result;
         previewWrap.style.display = 'block';
-      }
 
-      if (loadingPreview) {
-        loadingPreview.src = e.target.result;
-      }
+        if (loadingPreview) {
+          loadingPreview.src = e.target.result;
+        }
+
+        feyreValidationPassed = true;
+        feyreUpdateGenerateState();
+      };
+
+      img.src = e.target.result;
     };
+
     reader.readAsDataURL(file);
   }
 
@@ -630,6 +725,11 @@
       return;
     }
 
+    if (!feyreValidationPassed) {
+      feyreShowError('Please upload a clearer front-facing full-body photo.');
+      return;
+    }
+
     feyreHideError();
     feyreShowStep('loading');
     feyreStartFakeProgress();
@@ -675,7 +775,7 @@
       feyreShowStep('upload');
       feyreShowError(error.message || 'Unknown error');
     } finally {
-      generateBtn.disabled = false;
+      generateBtn.disabled = !feyreValidationPassed;
     }
   }
 </script>

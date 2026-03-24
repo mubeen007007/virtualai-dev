@@ -30,6 +30,54 @@ async function fileToLightProcessedDataUri(file) {
   return `data:image/jpeg;base64,${base64}`;
 }
 
+async function validateUserPhotoOnServer(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const image = sharp(Buffer.from(arrayBuffer), { failOn: "none" }).rotate();
+
+  const metadata = await image.metadata();
+  const stats = await image.stats();
+
+  const width = metadata.width || 0;
+  const height = metadata.height || 0;
+  const sizeMb = file.size / (1024 * 1024);
+  const aspectRatio = width && height ? width / height : 0;
+
+  const meanR = stats.channels?.[0]?.mean || 0;
+  const meanG = stats.channels?.[1]?.mean || 0;
+  const meanB = stats.channels?.[2]?.mean || 0;
+  const brightness = (meanR + meanG + meanB) / 3;
+
+  if (!file.type.startsWith("image/")) {
+    return "Please upload an image file.";
+  }
+
+  if (sizeMb > 10) {
+    return "Image is too large. Please upload an image under 10MB.";
+  }
+
+  if (width < 900 || height < 1200) {
+    return "Image is too small. Please upload a clearer, higher-resolution photo.";
+  }
+
+  if (width >= height) {
+    return "Please upload a portrait photo, not a landscape image.";
+  }
+
+  if (aspectRatio < 0.5 || aspectRatio > 0.85) {
+    return "Please upload a straight portrait photo with full body visible.";
+  }
+
+  if (brightness < 55) {
+    return "Image is too dark. Please upload a brighter photo.";
+  }
+
+  if (brightness > 245) {
+    return "Image is too washed out. Please upload a photo with normal lighting.";
+  }
+
+  return null;
+}
+
 export const loader = async ({ request }) => {
   await authenticate.public.appProxy(request);
 
@@ -64,10 +112,15 @@ export const action = async ({ request }) => {
       );
     }
 
-    // Very light processing only on the user image
-    const processedUserImage = await fileToLightProcessedDataUri(userImage);
+    const serverValidationError = await validateUserPhotoOnServer(userImage);
+    if (serverValidationError) {
+      return Response.json(
+        { error: serverValidationError },
+        { status: 400 },
+      );
+    }
 
-    // Do NOT preprocess the garment image
+    const processedUserImage = await fileToLightProcessedDataUri(userImage);
     productImage = normalizeImageUrl(productImage);
 
     const result = await fal.subscribe("fal-ai/fashn/tryon/v1.6", {
