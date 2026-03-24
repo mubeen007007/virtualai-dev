@@ -53,6 +53,17 @@
 
         <div id="feyre-loading-text" class="feyre-loading-text" style="display:none;"></div>
 
+        <div id="feyre-result-image-wrap" class="feyre-result-image-wrap" style="display:none;">
+          <p class="feyre-preview-label">Try-on result</p>
+          <img
+            id="feyre-result-image"
+            class="feyre-preview-img"
+            src=""
+            alt="Generated try-on result"
+            width="240"
+            height="320">
+        </div>
+
         <div id="feyre-result-box" class="feyre-result-box" style="display:none;">
           <p class="feyre-preview-label">Backend response</p>
           <pre id="feyre-result-text"></pre>
@@ -171,6 +182,10 @@
     color: #111;
   }
 
+  .feyre-result-image-wrap {
+    margin-top: 16px;
+  }
+
   .feyre-result-box {
     margin-top: 16px;
     padding: 12px;
@@ -259,6 +274,8 @@
     var loadingText = document.getElementById('feyre-loading-text');
     var resultBox = document.getElementById('feyre-result-box');
     var resultText = document.getElementById('feyre-result-text');
+    var resultImageWrap = document.getElementById('feyre-result-image-wrap');
+    var resultImage = document.getElementById('feyre-result-image');
 
     if (!uploadInput || !uploadInput.files || !uploadInput.files[0]) {
       alert('Please choose your photo first.');
@@ -273,8 +290,9 @@
     formData.append('productImage', productImage);
 
     loadingText.style.display = 'block';
-    loadingText.innerText = 'Sending request to backend...';
+    loadingText.innerText = 'Generating try-on...';
     resultBox.style.display = 'none';
+    resultImageWrap.style.display = 'none';
     resultText.textContent = '';
 
     try {
@@ -284,7 +302,6 @@
       });
 
       var text = await response.text();
-      console.log('RAW RESPONSE:', text);
 
       var data;
       try {
@@ -293,7 +310,13 @@
         throw new Error(text);
       }
 
-      loadingText.innerText = 'Backend connected successfully.';
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Generation failed');
+      }
+
+      loadingText.innerText = 'Try-on generated successfully.';
+      resultImage.src = data.resultImage;
+      resultImageWrap.style.display = 'block';
       resultBox.style.display = 'block';
       resultText.textContent = JSON.stringify(data, null, 2);
     } catch (error) {

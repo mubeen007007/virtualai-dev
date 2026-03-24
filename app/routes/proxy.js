@@ -1,4 +1,17 @@
+import { fal } from "@fal-ai/client";
 import { authenticate } from "../shopify.server";
+
+fal.config({
+  credentials: process.env.FAL_KEY,
+});
+
+function fileToDataUri(file) {
+  return file.arrayBuffer().then((buffer) => {
+    const base64 = Buffer.from(buffer).toString("base64");
+    const mime = file.type || "image/jpeg";
+    return `data:${mime};base64,${base64}`;
+  });
+}
 
 export const loader = async ({ request }) => {
   await authenticate.public.appProxy(request);
@@ -27,10 +40,52 @@ export const action = async ({ request }) => {
       );
     }
 
+    if (!process.env.FAL_KEY) {
+      return Response.json(
+        { error: "FAL_KEY is missing on the server" },
+        { status: 500 },
+      );
+    }
+
+    const modelImageDataUri = await fileToDataUri(userImage);
+
+    const result = await fal.subscribe("fal-ai/fashn/tryon/v1.6", {
+      input: {
+        model_image: modelImageDataUri,
+        garment_image: productImage,
+        category: "one-pieces",
+        mode: "balanced",
+        garment_photo_type: "auto",
+        moderation_level: "permissive",
+        num_samples: 1,
+        segmentation_free: true,
+        output_format: "png",
+      },
+      logs: true,
+      onQueueUpdate: (update) => {
+        if (update.status === "IN_PROGRESS" && update.logs) {
+          update.logs.forEach((log) => console.log(log.message));
+        }
+      },
+    });
+
+    const outputImage = result?.data?.images?.[0]?.url;
+
+    if (!outputImage) {
+      return Response.json(
+        {
+          success: false,
+          error: "fal.ai did not return an output image",
+          raw: result?.data || null,
+        },
+        { status: 500 },
+      );
+    }
+
     return Response.json({
       success: true,
-      message: "Proxy backend route is working",
-      productImage,
+      message: "Try-on generated successfully",
+      resultImage: outputImage,
       uploadedFileName: userImage?.name || "unknown-file",
     });
   } catch (error) {
